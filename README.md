@@ -3,6 +3,7 @@
 Sistema web desenvolvido para a eleição de representantes e vice-representantes de turma da **Escola Estadual Vicente de Paula Fraga**.
 
 ---
+<img width="900" height="800" alt="127 0 0 1_5500_index html" src="https://github.com/user-attachments/assets/97fea84a-29c3-4867-abe5-3392f6839c95" />
 
 ## 📌 Descrição
 
