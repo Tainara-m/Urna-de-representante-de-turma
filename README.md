@@ -66,7 +66,7 @@ Para acessar os resultados:
 
 ```txt
 adm103993
-
+```
 ## 📊 Recursos do Painel
 
 - Visualização de votos por turma  
