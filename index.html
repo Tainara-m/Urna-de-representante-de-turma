@@ -1,854 +1,273 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Votação Escolar | Escola Estadual Vicente de Paula Fraga</title>
-      <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="manifest" href="/site.webmanifest">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Serif+4:wght@300;400;600;700&display=swap');
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --vermelho: #B03A2E;
-      --vermelho-escuro: #7B241C;
-      --vermelho-claro: #FAEDEB;
-      --cinza: #2C2C2A;
-      --cinza-medio: #5F5E5A;
-      --cinza-claro: #F1EFE8;
-      --branco: #FFFFFF;
-      --borda: rgba(0,0,0,0.13);
-      --sombra: 0 18px 45px rgba(0,0,0,0.08);
-      --raio: 18px;
-    }
-
-    html, body { scroll-behavior: smooth; height: 100%; }
-
-    body {
-      min-height: 100vh;
-      font-family: 'Source Serif 4', Georgia, serif;
-      font-size: 0.88rem;
-      background:
-        radial-gradient(circle at top left, rgba(176,58,46,0.14), transparent 32rem),
-        linear-gradient(180deg, #fff 0%, var(--cinza-claro) 100%);
-      color: var(--cinza);
-    }
-
-    button, input { font: inherit; }
-    button { -webkit-tap-highlight-color: transparent; }
-
-    #app { min-height: 100vh; display: flex; flex-direction: column; }
-    main { flex: 1; min-height: 0; padding-bottom: calc(5rem + env(safe-area-inset-bottom)); display: flex; }
-
-    /* Cabeçalho compacto com logo, título e ações */
-    .header {
-      background: linear-gradient(135deg, var(--vermelho-escuro), var(--vermelho));
-      color: white;
-      padding: 0.7rem 1rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.9rem;
-      border-bottom: 4px solid rgba(255,255,255,0.25);
-      position: sticky;
-      top: 0;
-      z-index: 30;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
-    }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      min-width: 0;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
-    .header-actions .btn {
-      min-height: 36px;
-      padding: 0.55rem 0.9rem;
-      font-size: 0.85rem;
-    }
-
-    .header-actions .nav-inner {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .logo-circle {
-      width: clamp(44px, 7vw, 64px);
-      height: clamp(44px, 7vw, 64px);
-      background: white;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      flex-shrink: 0;
-      overflow: hidden;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.18);
-    }
-
-    .logo-circle img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
-
-    .header-text h1 {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: clamp(0.95rem, 3vw, 1.35rem);
-      line-height: 1.15;
-      letter-spacing: 0.01em;
-    }
-
-    .header-text p {
-      font-size: clamp(0.68rem, 2.2vw, 0.82rem);
-      opacity: 0.9;
-      margin-top: 0.25rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .screen {
-      display: none;
-      width: min(100%, 900px);
-      margin: 0 auto;
-      padding: clamp(0.8rem, 3vw, 1.6rem);
-      min-height: 100%;
-      flex: 1;
-    }
-
-    .screen.active { display: flex; flex-direction: column; animation: aparecer 0.28s ease; }
-
-    .screen-note {
-      margin-top: 0.9rem;
-      padding: 0.8rem 0.95rem;
-      background: rgba(240, 245, 250, 0.7);
-      border: 1px solid rgba(176, 58, 46, 0.12);
-      border-radius: 14px;
-      color: var(--cinza-medio);
-      font-size: 0.9rem;
-      line-height: 1.55;
-    }
-
-    button:focus-visible,
-    .turma-card:focus-visible,
-    .candidato-card:focus-visible,
-    .tab-btn:focus-visible {
-      outline: 3px solid rgba(176, 58, 46, 0.35);
-      outline-offset: 3px;
-    }
-
-    @keyframes aparecer {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .panel {
-      background: rgba(255,255,255,0.88);
-      border: 1px solid rgba(255,255,255,0.7);
-      border-radius: var(--raio);
-      box-shadow: var(--sombra);
-      padding: clamp(0.9rem, 3vw, 1.6rem);
-      backdrop-filter: blur(10px);
-    }
-
-    .step-indicator { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.4rem; margin-bottom: 1.1rem; }
-    .step-dot { height: 0.3rem; border-radius: 999px; background: rgba(0,0,0,0.12); }
-    .step-dot.done { background: var(--vermelho); }
-
-    /* Títulos e descrições das telas */
-    .screen-title {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: clamp(1.2rem, 3vw, 1.5rem);
-      color: var(--vermelho-escuro);
-      line-height: 1.1;
-      margin-bottom: 0.35rem;
-    }
-
-    .screen-subtitle {
-      font-size: clamp(0.88rem, 2vw, 0.95rem);
-      color: var(--cinza-medio);
-      margin-bottom: 1rem;
-      line-height: 1.5;
-      max-width: 680px;
-    }
-
-    .section-label {
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.11em;
-      color: var(--cinza-medio);
-      margin: 0.95rem 0 0.5rem;
-      font-weight: 700;
-    }
-
-    .turma-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
-      gap: 0.65rem;
-    }
-
-    .turma-card, .candidato-card, .confirm-box, .result-turma, .senha-box {
-      background: white;
-      border: 1.5px solid var(--borda);
-      border-radius: 14px;
-    }
-
-    .turma-card {
-      padding: 0.8rem;
-      text-align: center;
-      cursor: pointer;
-      transition: 0.2s ease;
-      min-height: 78px;
-      display: grid;
-      place-items: center;
-    }
-
-    .turma-card:hover, .turma-card.selected, .candidato-card:hover, .candidato-card.selected {
-      border-color: var(--vermelho);
-      background: var(--vermelho-claro);
-      transform: translateY(-2px);
-      box-shadow: 0 0 0 4px rgba(176,58,46,0.10);
-    }
-
-    .turma-nivel { font-size: 0.66rem; color: var(--cinza-medio); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; }
-    .turma-nome { font-family: 'Playfair Display', serif; font-size: clamp(0.95rem, 2.8vw, 1.15rem); color: var(--cinza); font-weight: 700; }
-
-    .candidato-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0.65rem; margin-bottom: 1rem; }
-
-    .candidato-card {
-      padding: clamp(0.7rem, 2.5vw, 0.9rem);
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      align-items: center;
-      gap: 0.7rem;
-      cursor: pointer;
-      transition: 0.2s ease;
-    }
-
-    .candidato-avatar {
-      width: clamp(34px, 8vw, 44px);
-      height: clamp(34px, 8vw, 44px);
-      border-radius: 50%;
-      background: var(--vermelho-escuro);
-      color: white;
-      display: grid;
-      place-items: center;
-      font-family: 'Playfair Display', serif;
-      font-weight: 700;
-      flex-shrink: 0;
-    }
-
-    .candidato-nome { font-size: clamp(0.9rem, 2.5vw, 1rem); font-weight: 700; }
-    .candidato-cargo { font-size: 0.82rem; color: var(--cinza-medio); margin-top: 0.08rem; }
-
-    .radio-custom { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--borda); display: grid; place-items: center; }
-    .radio-dot { width: 10px; height: 10px; border-radius: 50%; background: white; opacity: 0; }
-    .candidato-card.selected .radio-custom { background: var(--vermelho); border-color: var(--vermelho); }
-    .candidato-card.selected .radio-dot { opacity: 1; }
-
-    .btn {
-      min-height: 40px;
-      padding: 0.62rem 1.05rem;
-      border-radius: 9px;
-      border: none;
-      cursor: pointer;
-      transition: 0.2s ease;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.3rem;
-    }
-
-    .btn-primary {
-      background: #7e1d18;
-      color: white;
-      box-shadow: 0 10px 22px rgba(126,29,24,0.22);
-      border: 1px solid rgba(255,255,255,0.18);
-    }
-    .btn-primary:hover {
-      background: #5f1511;
-    }
-    .btn-primary:disabled {
-      background: rgba(0,0,0,0.22);
-      color: rgba(255,255,255,0.9);
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-      border-color: rgba(255,255,255,0.1);
-    }
-    .btn-secondary {
-      background: #ffffffee;
-      color: var(--cinza);
-      border: 1.5px solid rgba(176,58,46,0.16);
-    }
-    .btn-secondary:hover {
-      border-color: var(--vermelho);
-      color: var(--vermelho-escuro);
-      background: #fff;
-    }
-    .btn-danger { background: transparent; color: var(--vermelho-escuro); border: 1.5px solid rgba(176,58,46,0.35); }
-
-    .confirm-box { padding: clamp(0.9rem, 3.5vw, 1.2rem); margin-bottom: 1rem; }
-    .confirm-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--cinza-medio); margin-bottom: 0.28rem; font-weight: 700; }
-    .confirm-value { font-family: 'Playfair Display', serif; font-size: clamp(1rem, 3.5vw, 1.2rem); font-weight: 700; }
-    .confirm-divider { border: 0; border-top: 1px solid var(--borda); margin: 0.9rem 0; }
-
-    .aviso {
-      background: #FEF3C7;
-      border: 1px solid #D97706;
-      border-radius: 12px;
-      padding: 0.85rem 1rem;
-      color: #7C2D12;
-      font-size: 0.93rem;
-      line-height: 1.45;
-    }
-
-    .success-screen { text-align: center; }
-    .urna-icon { width: clamp(70px, 18vw, 90px); height: clamp(70px, 18vw, 90px); border-radius: 50%; background: var(--vermelho-claro); display: grid; place-items: center; margin: 0 auto 1rem; animation: pulsar 0.9s ease-out; }
-    @keyframes pulsar { 0% { transform: scale(.5); opacity: 0; } 70% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); } }
-
-    .confete-container { position: relative; height: 48px; overflow: hidden; margin-bottom: 0.5rem; }
-    .confete { position: absolute; width: 7px; height: 7px; border-radius: 2px; animation: confete-cair 1.5s ease-in forwards; }
-    @keyframes confete-cair { 0% { transform: translateY(-18px) rotate(0); opacity: 1; } 100% { transform: translateY(85px) rotate(720deg); opacity: 0; } }
-    .success-title { font-family: 'Playfair Display', serif; font-size: clamp(1.5rem, 5vw, 2rem); color: var(--vermelho-escuro); margin-bottom: 0.4rem; }
-    .success-msg { font-size: 0.95rem; color: var(--cinza-medio); max-width: 380px; margin: 0 auto 1.2rem; line-height: 1.55; }
-
-    .senha-box { padding: clamp(0.9rem, 4vw, 1.4rem); max-width: 360px; margin: 1rem auto 0; text-align: center; }
-    .senha-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 0.25rem; }
-    .senha-sub { font-size: 0.88rem; color: var(--cinza-medio); margin-bottom: 1rem; }
-    .senha-input { width: 100%; min-height: 42px; padding: 0.65rem 0.9rem; border: 1.5px solid var(--borda); border-radius: 10px; text-align: center; letter-spacing: 0.2em; outline: none; margin-bottom: 0.75rem; }
-    .senha-input:focus { border-color: var(--vermelho); box-shadow: 0 0 0 4px rgba(176,58,46,0.12); }
-    .senha-erro { color: var(--vermelho-escuro); font-size: 0.86rem; margin-bottom: 0.65rem; display: none; }
-
-    .top-actions { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.9rem; margin-bottom: 1rem; flex-wrap: wrap; }
-    .tab-nav { display: flex; gap: 0.3rem; margin-bottom: 1rem; overflow-x: auto; padding-bottom: 0.3rem; }
-    .tab-btn { white-space: nowrap; background: white; color: var(--cinza-medio); border: 1px solid var(--borda); border-radius: 999px; padding: 0.45rem 0.9rem; cursor: pointer; font-weight: 700; }
-    .tab-btn.active { background: var(--vermelho); color: white; border-color: var(--vermelho); }
-
-    .result-turma { margin-bottom: 1rem; overflow: hidden; }
-    .result-turma-header { background: var(--vermelho-escuro); color: white; padding: 0.8rem 1rem; display: flex; justify-content: space-between; align-items: center; gap: 0.8rem; }
-    .result-turma-nome { font-family: 'Playfair Display', serif; font-weight: 700; }
-    .result-votos-total { font-size: 0.85rem; opacity: 0.86; white-space: nowrap; }
-    .result-candidato { padding: 0.85rem 1rem; display: grid; grid-template-columns: 34px minmax(130px, 1fr) minmax(160px, 1.4fr); gap: 0.8rem; align-items: center; border-bottom: 1px solid var(--cinza-claro); }
-    .result-candidato:last-child { border-bottom: none; }
-    .result-pos { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-size: 0.85rem; font-weight: 700; }
-    .pos-1 { background: #FEF3C7; color: #92400E; }
-    .pos-2 { background: #EBF5FB; color: #1A5276; }
-    .pos-outro { color: #777; border: 1px solid #ddd; }
-    .result-nome { font-weight: 700; }
-    .result-cargo-tag { display: inline-block; margin-left: 0.35rem; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.12rem 0.45rem; border-radius: 999px; vertical-align: middle; }
-    .tag-rep { background: var(--vermelho-claro); color: var(--vermelho-escuro); }
-    .tag-vice { background: #EBF5FB; color: #1A5276; }
-    .result-barra-wrap { display: flex; align-items: center; gap: 0.6rem; min-width: 0; }
-    .result-barra-bg { flex: 1; height: 0.45rem; background: var(--cinza-claro); border-radius: 999px; overflow: hidden; }
-    .result-barra { height: 100%; background: var(--vermelho); border-radius: inherit; transition: width 0.7s ease; }
-    .result-pct { min-width: 72px; text-align: right; font-size: 0.88rem; color: var(--cinza-medio); }
-    .empty-msg { text-align: center; color: var(--cinza-medio); padding: 2rem; }
-
-    .nav-inner { width: min(100%, 420px); display: flex; justify-content: flex-end; gap: 0.75rem; }
-    .admin-float { display: none; }
-
-    @media (max-width: 700px) {
-      main { padding-bottom: calc(6.5rem + env(safe-area-inset-bottom)); }
-      .header { align-items: flex-start; }
-      .header-text p { line-height: 1.35; }
-      .panel { border-radius: 16px; }
-      .turma-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .nav-inner { display: grid; grid-template-columns: 1fr 1fr; }
-      .nav-inner .btn:only-child { grid-column: 1 / -1; }
-      .btn { width: 100%; }
-      .result-candidato { grid-template-columns: 32px 1fr; }
-      .result-barra-wrap { grid-column: 1 / -1; }
-      .result-pct { min-width: 68px; }
-      .admin-float { right: 0.75rem; bottom: calc(5.8rem + env(safe-area-inset-bottom)); }
-    }
-
-    @media (max-width: 420px) {
-      .turma-grid { grid-template-columns: 1fr; }
-      .candidato-card { grid-template-columns: auto 1fr; }
-      .radio-custom { grid-column: 1 / -1; justify-self: end; margin-top: -0.3rem; }
-      .result-turma-header { flex-direction: column; align-items: flex-start; }
-      .nav-inner { grid-template-columns: 1fr; }
-      .admin-float { left: 1rem; right: 1rem; }
-      .admin-float button { width: 100%; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Urna Escolar | E.E. Vicente de Paula Fraga</title>
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="manifest" href="site.webmanifest">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Serif+4:wght@400;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--v:#B03A2E;--vd:#7B241C;--vc:#FAEDEB;--c:#2C2C2A;--cm:#5F5E5A;--cc:#F1EFE8;--b:rgba(0,0,0,.14)}
+body{font-family:'Source Serif 4',Georgia,serif;font-size:16px;color:var(--c);background:linear-gradient(180deg,#fff,var(--cc));min-height:100vh}
+button,input,select,textarea{font:inherit}
+h1,h2,h3{font-family:'Playfair Display',Georgia,serif}
+.hd{background:linear-gradient(135deg,var(--vd),var(--v));color:#fff;padding:.6rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.8rem;position:sticky;top:0;z-index:5}
+.hd .l{display:flex;align-items:center;gap:.7rem;min-width:0}
+.hd img{width:48px;height:48px;border-radius:50%;background:#fff;padding:3px;object-fit:contain}
+.hd h1{font-size:clamp(.95rem,3vw,1.3rem);line-height:1.15}
+.hd small{opacity:.9;font-size:.78rem}
+main{max-width:980px;margin:0 auto;padding:clamp(.8rem,3vw,1.5rem)}
+.card{background:#fff;border:1px solid var(--b);border-radius:14px;padding:clamp(.9rem,3vw,1.5rem);box-shadow:0 12px 36px rgba(0,0,0,.07);margin-bottom:1rem}
+.btn{min-height:42px;padding:.55rem 1.1rem;border-radius:9px;border:1.5px solid transparent;cursor:pointer;font-weight:700;background:var(--vd);color:#fff}
+.btn:hover{background:#5f1511}.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.s{background:#fff;color:var(--c);border-color:var(--b)}.btn.s:hover{border-color:var(--v)}
+.btn.d{background:#fff;color:var(--vd);border-color:var(--v)}
+:focus-visible{outline:3px solid rgba(176,58,46,.45);outline-offset:2px}
+input,select,textarea{width:100%;min-height:42px;padding:.5rem .75rem;border:1.5px solid var(--b);border-radius:9px;background:#fff}
+label{display:block;font-size:.85rem;font-weight:700;color:var(--cm);margin:.7rem 0 .25rem}
+.row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:flex-end}.row>*{flex:1 1 150px}
+.msg{color:var(--vd);font-size:.9rem;margin-top:.5rem;min-height:1.2em}
+.tabs{display:flex;gap:.4rem;overflow-x:auto;margin-bottom:1rem}
+.tabs .btn{white-space:nowrap;border-radius:999px;min-height:38px}
+.tbl{width:100%;border-collapse:collapse;font-size:.92rem}
+.tbl td,.tbl th{padding:.45rem .5rem;border-bottom:1px solid var(--cc);text-align:left}
+.wrap{overflow-x:auto}
+.thumb{width:44px;height:54px;object-fit:cover;border-radius:6px;background:var(--cc)}
+.tag{font-size:.72rem;padding:.1rem .5rem;border-radius:99px;background:var(--vc);color:var(--vd);font-weight:700;margin-left:.3rem}
+.tag.v{background:#EBF5FB;color:#1A5276}.tag.e{background:#FEF3C7;color:#92400E}
+.bar{height:.5rem;background:var(--cc);border-radius:99px;overflow:hidden;flex:1}.bar i{display:block;height:100%;background:var(--v)}
+.rc{display:grid;grid-template-columns:44px 1fr minmax(120px,1.2fr);gap:.7rem;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--cc)}
+.rh{background:var(--vd);color:#fff;padding:.6rem .9rem;border-radius:10px 10px 0 0;display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
+.rb{border:1px solid var(--b);border-radius:10px;margin-bottom:1rem;overflow:hidden}.rb>div:not(.rh){padding:0 .9rem}
+.hero{text-align:center;max-width:460px;margin:2vh auto}
+.hero h2{color:var(--vd);font-size:1.6rem;margin-bottom:.4rem}
+.hero input{text-align:center;font-size:1.3rem;letter-spacing:.15em;margin:1rem 0 .5rem}
+.mdl{position:fixed;inset:0;background:rgba(0,0,0,.55);display:grid;place-items:center;padding:1rem;z-index:20}.mdl[hidden]{display:none}
+.mdl .card{max-width:420px;width:100%;margin:0}
+.dl{margin:.8rem 0}.dl b{display:block;font-size:.75rem;color:var(--cm);text-transform:uppercase;letter-spacing:.08em}.dl span{font-family:'Playfair Display',serif;font-size:1.25rem}
+/* urna */
+.urna{display:grid;grid-template-columns:1.6fr 1fr;gap:1rem;background:#3a3a38;padding:1rem;border-radius:16px}
+.tela{background:#e6ebdc;border:4px solid #222;border-radius:8px;padding:1rem;min-height:340px;display:flex;flex-direction:column;gap:.6rem;color:#111}
+.tela small{font-size:.8rem}.tela h3{font-size:1.1rem}
+.dig{display:flex;gap:.4rem}.dig i{width:46px;height:56px;border:2px solid #111;display:grid;place-items:center;font:700 2rem/1 monospace;font-style:normal;background:#f4f7ee}
+.cand{display:flex;gap:.8rem;align-items:center}.cand img,.cand .ph{width:90px;height:110px;object-fit:cover;border:2px solid #111;background:#ccd}
+.big{font:700 1.8rem 'Playfair Display',serif;text-align:center;margin:auto}
+.rod{margin-top:auto;border-top:1px solid #111;padding-top:.4rem;font-size:.78rem}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;align-content:start}
+.pad button{min-height:52px;border-radius:7px;border:0;background:#1d1d1c;color:#fff;font:700 1.4rem monospace;cursor:pointer;box-shadow:0 3px 0 #000}
+.pad button:active{transform:translateY(2px);box-shadow:none}
+.pad .w{background:#fff;color:#111;font-size:.72rem;grid-column:1/-1}.pad .o{background:#e8802a;font-size:.72rem}.pad .g{background:#2e9e4f;font-size:.72rem;grid-column:span 2}
+.pad .z{grid-column:2}
+@media(max-width:640px){.urna{grid-template-columns:1fr}.tela{min-height:300px}.rc{grid-template-columns:44px 1fr}.rc .bw{grid-column:1/-1}}
+#rel{display:none}
+@media print{body>*:not(#rel){display:none!important}#rel{display:block;color:#000;font-size:11pt}#rel .rb{break-inside:avoid;border-color:#999}#rel .rh{background:#eee;color:#000;border:1px solid #999}@page{size:A4;margin:14mm}.sig{display:flex;gap:3rem;margin-top:3rem}.sig div{flex:1;border-top:1px solid #000;text-align:center;padding-top:.3rem}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
 </head>
 <body>
-  <!-- Aplicativo de votação central -->
-  <div id="app">
-    <!-- Cabeçalho principal com logo, nome da escola e ações -->
-    <header class="header">
-      <div class="header-left">
-        <div class="logo-circle"><img src="logo.png" alt="Logo da Escola Estadual Vicente de Paula Fraga"></div>
-        <div class="header-text">
-          <h1>Escola Estadual Vicente de Paula Fraga</h1>
-          <p>Sistema de Eleição de Representantes de Turma · 2026</p>
-        </div>
-      </div>
-      <div class="header-actions">
-        <button id="btn-resultados" class="btn btn-secondary" type="button" onclick="irParaResultados()">Ver resultados</button>
-        <nav id="nav-votacao" aria-label="Navegação da votação">
-          <div class="nav-inner" id="nav-inner"></div>
-        </nav>
-      </div>
-    </header>
+<header class="hd">
+  <div class="l"><img src="logo.png" alt="Logo da escola"><div><h1>Escola Estadual Vicente de Paula Fraga</h1><small>Eleição de representantes de turma · 2026</small></div></div>
+  <button class="btn s" id="hb" onclick="location.hash='#/admin'">Coordenação</button>
+</header>
+<main id="v"></main>
+<div class="mdl" id="modal" hidden></div>
+<div id="rel"></div>
+<script>
+const TURMAS=[['6efti','6º ano EFTI'],['7efti','7º ano EFTI'],['8efti','8º ano EFTI'],['9efti','9º ano EFTI'],['1emti','1º ano EMTI'],['2emti','2º ano EMTI'],['3emti','3º ano EMTI']];
+const NT=Object.fromEntries(TURMAS);
+const SEED={'6efti':'Juliano,Pérola,Gustavo,Isadora,Yasmin,Erique,Pablo','7efti':'Alex,Davi,Lucas,Júlia,Ana Júlia,Tales,David','8efti':'Theo,Thayane,Maria Eduarda,Riquelme,Maria Cecília,Wagner','9efti':'Ana Laura,Thaila,Adriany','1emti':'Carlos Alves,Cauan,Edson,Maria Fernanda Alves,Maria Fernanda Silva','2emti':'Any Cristhiny,Emylly Yasmin,Ezequiel,Josué,Luiz Henrique,Rita','3emti':'Kailaine,Marcela Bessa,Mylla,Andrei,Cassiano'};
+const K='urna-vpf-2026-v2';
+let D=JSON.parse(localStorage.getItem(K)||'null')||{meta:{status:'preparacao'},cands:{},eleitores:{},votos:{}};
+const save=()=>localStorage.setItem(K,JSON.stringify(D));
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const mat=s=>String(s).toUpperCase().replace(/[^A-Z0-9]/g,'');
+const opts=(sel)=>TURMAS.map(([i,n])=>`<option value="${i}" ${sel===i?'selected':''}>${n}</option>`).join('');
+const H=async s=>crypto.subtle?[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)))].map(b=>b.toString(16).padStart(2,'0')).join(''):btoa(s);
+let U=null,idle=null,tab='painel',FOTO=null,fT='6efti',eT='';
+const V=h=>{$('#v').innerHTML=h};
+const modal=h=>{const m=$('#modal');m.innerHTML=`<div class="card" role="dialog" aria-modal="true">${h}</div>`;m.hidden=false};
+const fechar=()=>{$('#modal').hidden=true};
 
-    <main>
-      <!-- Tela de seleção de turma -->
-      <section id="screen-turma" class="screen active">
-        <div class="panel">
-          <div class="step-indicator" aria-label="Etapa 1 de 4"><div class="step-dot done"></div><div class="step-dot"></div><div class="step-dot"></div><div class="step-dot"></div></div>
-          <h2 class="screen-title">Selecione sua turma</h2>
-          <p class="screen-subtitle">Escolha a turma à qual você pertence para prosseguir com a votação.</p>
-          <p class="screen-note">Selecione sua turma e use o botão Avançar no cabeçalho.</p>
+function render(){
+  U=null;clearTimeout(idle);fechar();
+  const h=location.hash;
+  $('#hb').style.display=h==='#/admin'?'none':'';
+  if(h==='#/acompanhar')return pub();
+  if(h==='#/admin')return admin();
+  home();
+}
+addEventListener('hashchange',render);
+addEventListener('storage',e=>{if(e.key===K){D=JSON.parse(e.newValue);if(location.hash==='#/acompanhar')pub();}});
+addEventListener('keydown',e=>{
+  if(!U||!$('#modal').hidden)return;
+  if(/^\d$/.test(e.key))tecla(e.key);else if(e.key==='Backspace')corrige();else if(e.key==='Enter'){e.preventDefault();confirma();}
+});
 
-          <p class="section-label">Ensino Fundamental — EFTI</p>
-          <div class="turma-grid" id="grid-ef"></div>
+/* ---------- votação ---------- */
+function home(){
+  const ab=D.meta.status==='aberta';
+  V(`<div class="card hero"><h2>${ab?'Informe sua matrícula':'Votação indisponível'}</h2>
+  <p>${ab?'Você confirmará seus dados antes de votar. Seu voto é secreto.':D.meta.status==='encerrada'?'A votação foi encerrada.':'A votação ainda não foi aberta pela coordenação.'}</p>
+  ${ab?`<input id="mt" placeholder="Nº da matrícula" autocomplete="off" onkeydown="if(event.key==='Enter')buscar()"><button class="btn" style="width:100%" onclick="buscar()">Continuar</button><div class="msg" id="er" role="alert"></div>`:''}
+  </div>`);
+  if(ab)$('#mt').focus();
+}
+function buscar(){
+  const m=mat($('#mt').value),e=D.eleitores[m];
+  if(!m)return;
+  if(!e)return $('#er').textContent='Matrícula não encontrada. Procure a coordenação.';
+  if(e.votou)return $('#er').textContent='Esta matrícula já votou.';
+  modal(`<h2>Confirme seus dados</h2><div class="dl"><b>Nome</b><span>${esc(e.nome)}</span></div><div class="dl"><b>Turma</b><span>${NT[e.turma]}</span></div><div class="dl"><b>Matrícula</b><span>${esc(m)}</span></div>
+  <div class="row"><button class="btn s" onclick="fechar()">Não sou eu</button><button class="btn" onclick="iniciar('${m}')">Sim, sou eu</button></div>`);
+}
+function iniciar(m){fechar();U={m,t:D.eleitores[m].turma,cod:'',b:false};urnaR();}
+function ping(){clearTimeout(idle);idle=setTimeout(()=>{U=null;home();},90000);}
+function urnaR(){
+  ping();
+  const c=U.cod.length===3?D.cands[U.t]?.[U.cod]:null;
+  let info='';
+  if(U.b)info='<div class="big">VOTO EM BRANCO</div>';
+  else if(U.cod.length===3)info=c?`<div class="cand">${c.foto?`<img src="${c.foto}" alt="">`:'<div class="ph"></div>'}<div><small>Nome</small><h3>${esc(c.nome)}</h3><small>Representante de turma</small></div></div>`:'<div class="big">NÚMERO ERRADO<br><small>VOTO NULO</small></div>';
+  const d=[0,1,2].map(i=>`<i>${U.cod[i]||''}</i>`).join('');
+  const pad=[1,2,3,4,5,6,7,8,9].map(n=>`<button onclick="tecla('${n}')" aria-label="${n}">${n}</button>`).join('');
+  V(`<div class="urna"><div class="tela" aria-live="polite"><small>SEU VOTO PARA</small><h3>Representante · ${NT[U.t]}</h3>
+  ${U.b?'':`<small>Número</small><div class="dig">${d}</div>`}${info}
+  <div class="rod">Aperte a tecla:<br>VERDE para CONFIRMAR este voto · LARANJA para CORRIGIR</div></div>
+  <div class="pad">${pad}<button class="z" onclick="tecla('0')">0</button>
+  <button class="w" onclick="branco()">BRANCO</button><button class="o" onclick="corrige()">CORRIGE</button><button class="g" onclick="confirma()">CONFIRMA</button></div></div>`);
+}
+function tecla(d){if(!U||U.b||U.cod.length>=3)return;U.cod+=d;urnaR();}
+function branco(){if(!U)return;U.b=true;U.cod='';urnaR();}
+function corrige(){if(!U)return;U.b=false;U.cod='';urnaR();}
+function confirma(){
+  if(!U)return;
+  const k=U.b?'branco':U.cod.length===3?(D.cands[U.t]?.[U.cod]?'c'+U.cod:'nulo'):null;
+  if(!k)return;
+  (D.votos[U.t]??={})[k]=(D.votos[U.t][k]||0)+1;
+  D.eleitores[U.m].votou=true;   // sem horário: o voto não se liga ao eleitor
+  save();U=null;clearTimeout(idle);
+  V(`<div class="urna" style="grid-template-columns:1fr"><div class="tela" style="min-height:300px;justify-content:center"><div class="big" style="font-size:4rem">FIM</div><p style="text-align:center">Voto registrado. Obrigado por participar!</p></div></div>`);
+  setTimeout(()=>{if(!U)home();},4000);
+}
 
-          <p class="section-label">Ensino Médio — EMTI</p>
-          <div class="turma-grid" id="grid-em"></div>
-        </div>
-      </section>
+/* ---------- resultados ---------- */
+function calc(t){
+  const v=D.votos[t]||{},cs=Object.entries(D.cands[t]||{}).map(([c,o])=>({c,...o,n:v['c'+c]||0})).sort((a,b)=>b.n-a.n||a.nome.localeCompare(b.nome));
+  const el=Object.values(D.eleitores).filter(e=>e.turma===t);
+  return{cs,br:v.branco||0,nu:v.nulo||0,apt:el.length,vot:el.filter(e=>e.votou).length};
+}
+function resHTML(){
+  return TURMAS.map(([t,nome])=>{
+    const r=calc(t),tot=r.cs.reduce((a,c)=>a+c.n,0)+r.br+r.nu;
+    const emp=i=>tot&&r.cs[i].n>0&&(r.cs[i+1]?.n===r.cs[i].n||r.cs[i-1]?.n===r.cs[i].n);
+    const lin=r.cs.map((c,i)=>{
+      const p=tot?Math.round(c.n/tot*100):0;
+      const tg=(i===0&&c.n?'<span class="tag">Representante</span>':i===1&&c.n?'<span class="tag v">Vice</span>':'')+(i<2&&emp(i)?'<span class="tag e">Empate</span>':'');
+      return `<div class="rc"><div>${c.foto?`<img class="thumb" src="${c.foto}" alt="">`:`<b>${i+1}º</b>`}</div><div><b>${esc(c.nome)}</b> <small>(${c.c})</small>${tg}</div><div class="bw" style="display:flex;gap:.5rem;align-items:center"><div class="bar"><i style="width:${p}%"></i></div><small>${c.n} (${p}%)</small></div></div>`;
+    }).join('')||'<p style="padding:.6rem 0">Sem candidatos cadastrados.</p>';
+    return `<div class="rb"><div class="rh"><b>${nome}</b><span>${tot} voto${tot!==1?'s':''} · ${r.vot}/${r.apt} eleitores votaram</span></div><div>${lin}<p style="padding:.6rem 0"><small>Brancos: <b>${r.br}</b> · Nulos: <b>${r.nu}</b> · Abstenções: <b>${r.apt-r.vot}</b></small></p></div></div>`;
+  }).join('');
+}
+function pub(){
+  const ok=D.meta.status==='encerrada'||D.meta.publico;
+  V(`<div class="card"><h2>Acompanhamento da apuração</h2><p style="color:var(--cm);margin:.3rem 0 1rem">Atualiza sozinho quando um voto é registrado.</p>${ok?resHTML():'<p>Os resultados serão exibidos quando a coordenação liberar ou ao encerrar a votação.</p>'}</div>`);
+}
 
-      <!-- Tela de seleção de candidato -->
-      <section id="screen-candidatos" class="screen">
-        <div class="panel">
-          <div class="step-indicator" aria-label="Etapa 2 de 4"><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot"></div><div class="step-dot"></div></div>
-          <h2 class="screen-title" id="titulo-candidatos">Candidatos</h2>
-          <p class="screen-subtitle">Escolha um candidato para representar sua turma. Seu voto será computado sem identificação do estudante.</p>
-          <p class="screen-note">Clique no seu candidato para ver uma prévia antes de avançar para confirmação.</p>
-          <div class="candidato-list" id="lista-candidatos"></div>
-        </div>
-      </section>
-
-      <!-- Tela de confirmação de voto -->
-      <section id="screen-confirmar" class="screen">
-        <div class="panel">
-          <div class="step-indicator" aria-label="Etapa 3 de 4"><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot"></div></div>
-          <h2 class="screen-title">Confirme seu voto</h2>
-          <p class="screen-subtitle">Revise as informações abaixo antes de finalizar. Esta ação não poderá ser desfeita.</p>
-          <div class="confirm-box">
-            <div class="confirm-label">Turma selecionada</div>
-            <div class="confirm-value" id="confirm-turma"></div>
-            <hr class="confirm-divider">
-            <div class="confirm-label">Candidato escolhido</div>
-            <div class="confirm-value" id="confirm-candidato"></div>
-            <hr class="confirm-divider">
-            <div class="confirm-label">Finalidade</div>
-            <div class="confirm-value" id="confirm-cargo" style="font-size:1rem;color:var(--cinza-medio);"></div>
-          </div>
-          <div class="aviso">Ao confirmar, o voto será registrado de forma anônima no navegador/dispositivo usado na votação.</div>
-        </div>
-      </section>
-
-      <!-- Tela de sucesso após o voto -->
-      <section id="screen-sucesso" class="screen success-screen">
-        <div class="panel">
-          <div class="confete-container" id="confete-box"></div>
-          <div class="urna-icon" aria-hidden="true">
-            <svg width="52" height="52" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="6" y="16" width="28" height="20" rx="3" fill="#B03A2E"/>
-              <rect x="14" y="12" width="12" height="8" rx="2" fill="#7B241C"/>
-              <rect x="18" y="6" width="4" height="8" rx="1" fill="#B03A2E"/>
-              <path d="M12 26 L17 31 L28 20" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <h2 class="success-title">Voto registrado!</h2>
-          <p class="success-msg">Seu voto foi computado com sucesso. Obrigado por participar da democracia escolar.</p>
-          <button class="btn btn-primary" onclick="reiniciar()">Nova votação</button>
-        </div>
-      </section>
-
-      <!-- Tela de acesso e apresentação de resultados -->
-      <section id="screen-resultados" class="screen">
-        <div class="panel" id="senha-container">
-          <h2 class="screen-title">Painel de Resultados</h2>
-          <p class="screen-subtitle">Acesso restrito à equipe responsável pela eleição.</p>
-          <div class="senha-box">
-            <div style="font-size:2.2rem;margin-bottom:.35rem;" aria-hidden="true">🔒</div>
-            <div class="senha-title">Área restrita</div>
-            <div class="senha-sub">Digite a senha administrativa para visualizar os resultados.</div>
-            <input type="password" class="senha-input" id="campo-senha" placeholder="••••••••" autocomplete="off">
-            <div class="senha-erro" id="senha-erro" role="alert" aria-live="polite">Senha incorreta. Tente novamente.</div>
-            <button type="button" class="btn btn-primary" style="width:100%" onclick="verificarSenha()">Acessar</button>
-            <button type="button" class="btn btn-secondary" style="width:100%; margin-top: 0.5rem;" onclick="showScreen('screen-sucesso')">Voltar</button>
-          </div>
-        </div>
-
-        <div class="panel" id="resultados-container" style="display:none;">
-          <div class="top-actions">
-            <div>
-              <h2 class="screen-title">Resultados da eleição</h2>
-              <p class="screen-subtitle" id="total-votos-geral"></p>
-            </div>
-            <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
-              <button class="btn btn-secondary" onclick="exportarResultados()">Exportar CSV</button>
-              <button class="btn btn-danger" onclick="zerarVotos()">Zerar votos</button>
-              <button class="btn btn-secondary" onclick="fecharResultados()">Sair</button>
-            </div>
-          </div>
-          <div class="tab-nav" aria-label="Filtros de resultados">
-            <button class="tab-btn active" onclick="filtrarResultados('todos', this)">Todos</button>
-            <button class="tab-btn" onclick="filtrarResultados('EFTI', this)">EFTI</button>
-            <button class="tab-btn" onclick="filtrarResultados('EMTI', this)">EMTI</button>
-          </div>
-          <div id="lista-resultados"></div>
-        </div>
-      </section>
-    </main>
-  </div>
-
-
-  <script>
-    // Senha de acesso ao painel de resultados
-    const SENHA_ADMIN = 'adm103993';
-    // Chave usada para armazenar votos no localStorage
-    const STORAGE_KEY = 'votos-vicente-paula-fraga-2026';
-
-    // Lista de turmas disponíveis para votação
-    const TURMAS = [
-      { nome: '6º ano EFTI', nivel: 'EFTI' },
-      { nome: '7º ano EFTI', nivel: 'EFTI' },
-      { nome: '8º ano EFTI', nivel: 'EFTI' },
-      { nome: '9º ano EFTI', nivel: 'EFTI' },
-      { nome: '1º ano EMTI', nivel: 'EMTI' },
-      { nome: '2º ano EMTI', nivel: 'EMTI' },
-      { nome: '3º ano EMTI', nivel: 'EMTI' }
-    ];
-
-    const CANDIDATOS = {
-      '6º ano EFTI': [
-        { nome: 'Juliano', iniciais: 'J' },
-        { nome: 'Pérola', iniciais: 'P' },
-        { nome: 'Gustavo', iniciais: 'G' },
-        { nome: 'Isadora ', iniciais: 'I' },
-        { nome: 'Yasmin', iniciais: 'Y' },
-        { nome: 'Erique', iniciais: 'E' },
-        { nome: 'Pablo', iniciais: 'P' }
-      ],
-      '7º ano EFTI': [
-        { nome: 'Alex', iniciais: 'A' },
-        { nome: 'Davi', iniciais: 'D' },
-        { nome: 'Lucas', iniciais: 'L' },
-        { nome: 'Júlia', iniciais: 'J' },
-        { nome: 'Ana Júlia', iniciais: 'AJ' },
-        { nome: 'Tales', iniciais: 'T' },
-        { nome: 'David', iniciais: 'D' }
-      ],
-      '8º ano EFTI': [
-        { nome: 'Theo', iniciais: 'T' },
-        { nome: 'Thayane', iniciais: 'T' },
-        { nome: 'Maria Eduarda', iniciais: 'ME' },
-        { nome: 'Riquelme', iniciais: 'R' },
-        { nome: 'Maria Cecília', iniciais: 'MC' },
-        { nome: 'Wagner', iniciais: 'W' }
-      ],
-      '9º ano EFTI': [
-        { nome: 'Ana Laura', iniciais: 'AL' },
-        { nome: 'Thaila', iniciais: 'T' },
-        { nome: 'Adriany', iniciais: 'A' }
-      ],
-      '1º ano EMTI': [
-        { nome: 'Carlos Alves', iniciais: 'CA' },
-        { nome: 'Cauan', iniciais: 'C' },
-        { nome: 'Edson', iniciais: 'E' },
-        { nome: 'Maria Fernanda Alves', iniciais: 'MA' },
-        { nome: 'Maria Fernanda Silva', iniciais: 'MS' }
-      ],
-      '2º ano EMTI': [
-        { nome: 'Any Cristhiny', iniciais: 'AC' },
-        { nome: 'Emylly Yasmin', iniciais: 'EY' },
-        { nome: 'Ezequiel', iniciais: 'E' },
-        { nome: 'Josué', iniciais: 'J' },
-        { nome: 'Luiz Henrique', iniciais: 'LH' },
-        { nome: 'Rita', iniciais: 'R' }
-      ],
-      '3º ano EMTI': [
-        { nome: 'Kailaine', iniciais: 'K' },
-        { nome: 'Marcela Bessa', iniciais: 'MB' },
-        { nome: 'Mylla ', iniciais: 'M' },
-        { nome: 'Andrei ', iniciais: 'A' },
-        { nome: 'Cassiano ', iniciais: 'C' }
-      ]
-    };
-
-    // Estado atual da votação em memória
-    let turmaAtual = null;
-    let candidatoAtual = null;
-    let filtroAtual = 'todos';
-    let votos = carregarVotos();
-
-    // Atalhos para seleção de elementos DOM
-    const $ = seletor => document.querySelector(seletor);
-    const $$ = seletor => document.querySelectorAll(seletor);
-
-    // Inicialização do aplicativo após o carregamento da página
-    document.addEventListener('DOMContentLoaded', () => {
-      montarTurmas();
-      atualizarNav('turma');
-      $('#campo-senha').addEventListener('keydown', event => {
-        if (event.key === 'Enter') verificarSenha();
-      });
-    });
-
-    // Cria e exibe os cards de cada turma na tela inicial
-    function montarTurmas() {
-      const gridEF = $('#grid-ef');
-      const gridEM = $('#grid-em');
-      TURMAS.forEach(turma => {
-        const card = document.createElement('button');
-        card.type = 'button';
-        card.className = 'turma-card';
-        card.dataset.turma = turma.nome;
-        card.dataset.nivel = turma.nivel;
-        card.innerHTML = `<div><div class="turma-nivel">${turma.nivel}</div><div class="turma-nome">${turma.nome.replace(' ' + turma.nivel, '')}</div></div>`;
-        card.onclick = () => selecionarTurma(card);
-        (turma.nivel === 'EFTI' ? gridEF : gridEM).appendChild(card);
-      });
-    }
-
-    // Carrega votos salvos no navegador, se houver
-    function carregarVotos() {
-      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
-      catch { return {}; }
-    }
-
-    function salvarVotos() { localStorage.setItem(STORAGE_KEY, JSON.stringify(votos)); }
-
-    // Mostra apenas a tela com o id informado e foca o primeiro elemento acessível
-    function showScreen(id) {
-      $$('.screen').forEach(s => s.classList.remove('active'));
-      const screen = $('#' + id);
-      screen.classList.add('active');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      const focusable = screen.querySelector('button:not(:disabled), input, [tabindex]:not([tabindex="-1"])');
-      if (focusable) focusable.focus({ preventScroll: true });
-    }
-
-    // Marca a turma selecionada e atualiza a navegação
-    function selecionarTurma(el) {
-      $$('.turma-card').forEach(c => c.classList.remove('selected'));
-      el.classList.add('selected');
-      turmaAtual = el.dataset.turma;
-      candidatoAtual = null;
-      atualizarNav('turma');
-    }
-
-    function irParaCandidatos() {
-      if (!turmaAtual) return;
-      candidatoAtual = null;
-      $('#titulo-candidatos').textContent = 'Candidatos — ' + turmaAtual;
-      const lista = $('#lista-candidatos');
-      lista.innerHTML = '';
-
-      (CANDIDATOS[turmaAtual] || []).forEach(candidato => {
-        const card = document.createElement('button');
-        card.type = 'button';
-        card.className = 'candidato-card';
-        card.innerHTML = `
-          <div class="candidato-avatar">${candidato.iniciais}</div>
-          <div class="candidato-info">
-            <div class="candidato-nome">${candidato.nome}</div>
-            <div class="candidato-cargo">Candidato(a) a representante de turma</div>
-          </div>
-          <div class="radio-custom"><div class="radio-dot"></div></div>`;
-        card.onclick = () => selecionarCandidato(card, candidato);
-        lista.appendChild(card);
-      });
-
-      atualizarNav('candidatos');
-      showScreen('screen-candidatos');
-    }
-
-    function selecionarCandidato(card, candidato) {
-      $$('.candidato-card').forEach(c => c.classList.remove('selected'));
-      card.classList.add('selected');
-      candidatoAtual = candidato;
-      atualizarNav('candidatos');
-    }
-
-    function voltarTurma() { atualizarNav('turma'); showScreen('screen-turma'); }
-
-    function irParaConfirmar() {
-      if (!candidatoAtual) return;
-      $('#confirm-turma').textContent = turmaAtual;
-      $('#confirm-candidato').textContent = candidatoAtual.nome;
-      $('#confirm-cargo').textContent = 'Eleição de representante e vice-representante';
-      atualizarNav('confirmar');
-      showScreen('screen-confirmar');
-    }
-
-    function voltarCandidatos() { atualizarNav('candidatos'); showScreen('screen-candidatos'); }
-
-    function confirmarVoto() {
-      if (!turmaAtual || !candidatoAtual) return;
-      if (!votos[turmaAtual]) votos[turmaAtual] = {};
-      votos[turmaAtual][candidatoAtual.nome] = (votos[turmaAtual][candidatoAtual.nome] || 0) + 1;
-      salvarVotos();
-      gerarConfete();
-      atualizarNav('sucesso');
-      showScreen('screen-sucesso');
-    }
-
-    function gerarConfete() {
-      const box = $('#confete-box');
-      box.innerHTML = '';
-      const cores = ['#B03A2E','#7B241C','#FAEDEB','#FFD700','#2980B9','#1ABC9C'];
-      for (let i = 0; i < 24; i++) {
-        const confete = document.createElement('div');
-        confete.className = 'confete';
-        confete.style.left = `${Math.random() * 100}%`;
-        confete.style.background = cores[i % cores.length];
-        confete.style.animationDelay = `${i * 0.035}s`;
-        confete.style.animationDuration = `${1.1 + Math.random() * 0.7}s`;
-        box.appendChild(confete);
-      }
-    }
-
-    function reiniciar() {
-      turmaAtual = null;
-      candidatoAtual = null;
-      $$('.turma-card').forEach(c => c.classList.remove('selected'));
-      atualizarNav('turma');
-      showScreen('screen-turma');
-    }
-
-    // Atualiza os botões do cabeçalho conforme a etapa atual da votação
-    // Atualiza os botões do cabeçalho de acordo com a etapa atual
-    function atualizarNav(etapa) {
-      const nav = $('#nav-inner');
-      const navVotacao = $('#nav-votacao');
-      const btnResultados = $('#btn-resultados');
-      nav.innerHTML = '';
-      if (navVotacao) navVotacao.style.display = etapa === 'sucesso' || etapa === 'resultados' ? 'none' : 'flex';
-      if (btnResultados) btnResultados.style.display = etapa === 'resultados' ? 'none' : 'inline-flex';
-
-      if (etapa === 'turma') {
-        nav.innerHTML = `<button class="btn btn-primary" ${!turmaAtual ? 'disabled' : ''} onclick="irParaCandidatos()">Avançar</button>`;
-      }
-      if (etapa === 'candidatos') {
-        nav.innerHTML = `<button class="btn btn-secondary" onclick="voltarTurma()">Voltar</button><button class="btn btn-primary" ${!candidatoAtual ? 'disabled' : ''} onclick="irParaConfirmar()">Confirmar escolha</button>`;
-      }
-      if (etapa === 'confirmar') {
-        nav.innerHTML = `<button class="btn btn-secondary" onclick="voltarCandidatos()">Voltar</button><button class="btn btn-primary" onclick="confirmarVoto()">Confirmar voto</button>`;
-      }
-    }
-
-    function irParaResultados() {
-      $('#campo-senha').value = '';
-      $('#senha-erro').style.display = 'none';
-      $('#senha-container').style.display = 'block';
-      $('#resultados-container').style.display = 'none';
-      $('#nav-votacao').style.display = 'none';
-      showScreen('screen-resultados');
-      setTimeout(() => $('#campo-senha').focus(), 120);
-    }
-
-    function verificarSenha() {
-      if ($('#campo-senha').value === SENHA_ADMIN) {
-        $('#senha-container').style.display = 'none';
-        $('#resultados-container').style.display = 'block';
-        renderResultados(filtroAtual);
-      } else {
-        $('#senha-erro').style.display = 'block';
-        $('#campo-senha').value = '';
-        $('#campo-senha').focus();
-      }
-    }
-
-    function fecharResultados() {
-      atualizarNav('turma');
-      showScreen('screen-turma');
-    }
-
-    function filtrarResultados(nivel, btn) {
-      filtroAtual = nivel;
-      $$('.tab-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      renderResultados(nivel);
-    }
-
-    function nivelDaTurma(nome) { return TURMAS.find(t => t.nome === nome)?.nivel || ''; }
-
-    function renderResultados(filtro = 'todos') {
-      votos = carregarVotos();
-      const container = $('#lista-resultados');
-      container.innerHTML = '';
-      let totalGeral = 0;
-      const turmas = TURMAS.filter(t => filtro === 'todos' || t.nivel === filtro);
-
-      turmas.forEach(turma => {
-        const votosTurma = votos[turma.nome] || {};
-        const candidatosTurma = CANDIDATOS[turma.nome] || [];
-        const totalTurma = candidatosTurma.reduce((acc, c) => acc + (votosTurma[c.nome] || 0), 0);
-        totalGeral += totalTurma;
-        const ordenados = candidatosTurma.map(c => ({ ...c, votos: votosTurma[c.nome] || 0 })).sort((a, b) => b.votos - a.votos || a.nome.localeCompare(b.nome));
-
-        const bloco = document.createElement('div');
-        bloco.className = 'result-turma';
-        bloco.innerHTML = `
-          <div class="result-turma-header">
-            <div class="result-turma-nome">${turma.nome}</div>
-            <div class="result-votos-total">${totalTurma} voto${totalTurma !== 1 ? 's' : ''}</div>
-          </div>
-          ${ordenados.map((c, i) => {
-            const pct = totalTurma > 0 ? Math.round((c.votos / totalTurma) * 100) : 0;
-            const posClass = i === 0 ? 'pos-1' : i === 1 ? 'pos-2' : 'pos-outro';
-            const tag = i === 0 ? '<span class="result-cargo-tag tag-rep">Representante</span>' : i === 1 ? '<span class="result-cargo-tag tag-vice">Vice</span>' : '';
-            return `<div class="result-candidato">
-              <div class="result-pos ${posClass}">${i + 1}</div>
-              <div class="result-nome">${c.nome} ${tag}</div>
-              <div class="result-barra-wrap">
-                <div class="result-barra-bg"><div class="result-barra" style="width:${pct}%"></div></div>
-                <div class="result-pct">${c.votos} (${pct}%)</div>
-              </div>
-            </div>`;
-          }).join('')}`;
-        container.appendChild(bloco);
-      });
-
-      if (!turmas.length) container.innerHTML = '<div class="empty-msg">Nenhuma turma encontrada.</div>';
-      $('#total-votos-geral').textContent = `Total computado: ${totalGeral} voto${totalGeral !== 1 ? 's' : ''}`;
-    }
-
-    function exportarResultados() {
-      votos = carregarVotos();
-      const linhas = [['Turma','Nível','Candidato','Votos','Classificação']];
-      TURMAS.forEach(turma => {
-        const votosTurma = votos[turma.nome] || {};
-        const ordenados = (CANDIDATOS[turma.nome] || []).map(c => ({ ...c, votos: votosTurma[c.nome] || 0 })).sort((a,b) => b.votos - a.votos || a.nome.localeCompare(b.nome));
-        ordenados.forEach((c, i) => linhas.push([turma.nome, turma.nivel, c.nome, c.votos, i === 0 ? 'Representante' : i === 1 ? 'Vice-representante' : `${i + 1}º lugar`]));
-      });
-      const csv = linhas.map(l => l.map(c => `"${String(c).replaceAll('"','""')}"`).join(';')).join('\n');
-      const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'resultados-votacao-escolar.csv';
-      link.click();
-      URL.revokeObjectURL(link.href);
-    }
-
-    function zerarVotos() {
-      if (!confirm('Tem certeza que deseja apagar todos os votos registrados neste navegador?')) return;
-      votos = {};
-      salvarVotos();
-      renderResultados(filtroAtual);
-    }
-  </script>
+/* ---------- coordenação ---------- */
+async function admin(){
+  if(!D.meta.h)return V(`<div class="card hero"><h2>Crie a senha da coordenação</h2><p>Primeiro acesso. Mínimo de 6 caracteres.</p><input id="pw" type="password" autocomplete="new-password" onkeydown="if(event.key==='Enter')criar()"><button class="btn" style="width:100%" onclick="criar()">Salvar senha</button><div class="msg" id="er"></div></div>`);
+  if(sessionStorage.getItem('adm')!==D.meta.h)return V(`<div class="card hero"><h2>Área da coordenação</h2><input id="pw" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')entrar()"><button class="btn" style="width:100%" onclick="entrar()">Entrar</button><div class="msg" id="er" role="alert"></div><button class="btn s" onclick="location.hash='#/'">Voltar</button></div>`);
+  const T=[['painel','Painel'],['cand','Candidatos'],['eleit','Eleitores'],['res','Resultados']];
+  V(`<div class="tabs">${T.map(([i,n])=>`<button class="btn ${tab===i?'':'s'}" onclick="tab='${i}';admin()">${n}</button>`).join('')}<button class="btn s" onclick="sair()">Sair</button></div><div id="ab"></div>`);
+  $('#ab').innerHTML={painel:pPainel,cand:pCand,eleit:pEleit,res:pRes}[tab]();
+}
+async function criar(){const p=$('#pw').value;if(p.length<6)return $('#er').textContent='Use ao menos 6 caracteres.';D.meta.h=await H(p);save();sessionStorage.setItem('adm',D.meta.h);admin();}
+async function entrar(){if(await H($('#pw').value)===D.meta.h){sessionStorage.setItem('adm',D.meta.h);admin();}else{$('#er').textContent='Senha incorreta.';}}
+function sair(){sessionStorage.removeItem('adm');location.hash='#/';}
+function pPainel(){
+  const s=D.meta.status,link=location.href.split('#')[0]+'#/acompanhar';
+  const nE=Object.keys(D.eleitores).length,nV=Object.values(D.eleitores).filter(e=>e.votou).length;
+  return `<div class="card"><h2>Situação da votação</h2><p style="margin:.4rem 0">${nE} eleitores cadastrados · ${nV} já votaram.</p>
+  <div class="row">${[['preparacao','Em preparação'],['aberta','Abrir votação'],['encerrada','Encerrar votação']].map(([i,n])=>`<button class="btn ${s===i?'':'s'}" onclick="setStatus('${i}')">${n}</button>`).join('')}</div></div>
+  <div class="card"><h2>Link de acompanhamento</h2><div class="row"><input readonly value="${esc(link)}" onclick="this.select()"><button class="btn" style="flex:0 0 auto" onclick="navigator.clipboard.writeText('${esc(link)}')">Copiar</button></div>
+  <label style="display:flex;gap:.5rem;align-items:center;font-weight:400"><input type="checkbox" style="width:auto;min-height:0" ${D.meta.publico?'checked':''} onchange="D.meta.publico=this.checked;save()"> Mostrar resultado parcial no link durante a votação</label>
+  <p class="msg" style="color:var(--cm)">Nesta versão o link atualiza em tempo real nas abas abertas no mesmo computador.</p></div>`;
+}
+function setStatus(s){D.meta.status=s;save();admin();}
+function pCand(){
+  const l=Object.entries(D.cands[fT]||{}).sort();
+  const vazio=!Object.keys(D.cands).length;
+  return `<div class="card"><h2>Candidatos</h2><div class="row"><div><label>Turma</label><select onchange="fT=this.value;FOTO=null;admin()">${opts(fT)}</select></div></div>
+  <div class="row"><div><label>Código (3 algarismos)</label><input id="cc" maxlength="3" inputmode="numeric" placeholder="123"></div><div style="flex:2 1 220px"><label>Nome</label><input id="cn"></div><div><label>Foto</label><input type="file" accept="image/*" onchange="pickFoto(this)"></div></div>
+  <button class="btn" style="margin-top:.8rem" onclick="addCand()">Cadastrar candidato</button><div class="msg" id="er" role="alert"></div>
+  ${vazio?`<button class="btn s" onclick="seed()">Importar candidatos da versão anterior</button>`:''}
+  <div class="wrap"><table class="tbl"><tr><th>Foto</th><th>Código</th><th>Nome</th><th></th></tr>${l.map(([c,o])=>`<tr><td>${o.foto?`<img class="thumb" src="${o.foto}" alt="">`:''}</td><td>${c}</td><td>${esc(o.nome)}</td><td><button class="btn d" onclick="delCand('${c}')">Remover</button></td></tr>`).join('')||'<tr><td colspan="4">Nenhum candidato nesta turma.</td></tr>'}</table></div></div>`;
+}
+function pickFoto(inp){
+  const f=inp.files[0];if(!f)return;const i=new Image();
+  i.onload=()=>{const c=document.createElement('canvas');c.width=180;c.height=220;const x=c.getContext('2d'),s=Math.max(180/i.width,220/i.height),w=i.width*s,h=i.height*s;x.drawImage(i,(180-w)/2,(220-h)/2,w,h);FOTO=c.toDataURL('image/jpeg',.8);URL.revokeObjectURL(i.src);};
+  i.src=URL.createObjectURL(f);
+}
+function addCand(){
+  const c=$('#cc').value.trim(),n=$('#cn').value.trim(),er=$('#er');
+  if(!/^\d{3}$/.test(c))return er.textContent='O código deve ter exatamente 3 algarismos.';
+  if(!n)return er.textContent='Informe o nome do candidato.';
+  if(D.cands[fT]?.[c])return er.textContent='Já existe um candidato com esse código nesta turma.';
+  (D.cands[fT]??={})[c]={nome:n,foto:FOTO};FOTO=null;save();admin();
+}
+function delCand(c){
+  if(Object.keys(D.votos[fT]||{}).length)return alert('Esta turma já tem votos. Zere os votos antes de remover candidatos.');
+  if(confirm('Remover este candidato?')){delete D.cands[fT][c];save();admin();}
+}
+function seed(){
+  TURMAS.forEach(([t])=>{const p={'6efti':6,'7efti':7,'8efti':8,'9efti':9,'1emti':1,'2emti':2,'3emti':3}[t];D.cands[t]={};SEED[t].split(',').forEach((n,i)=>D.cands[t][`${p}${String(i+1).padStart(2,'0')}`]={nome:n,foto:null});});
+  save();admin();
+}
+function pEleit(){
+  const l=Object.entries(D.eleitores).filter(([,e])=>!eT||e.turma===eT).sort((a,b)=>a[1].nome.localeCompare(b[1].nome));
+  return `<div class="card"><h2>Eleitores</h2>
+  <div class="row"><div><label>Turma</label><select id="et">${opts(fT)}</select></div><div><label>Matrícula</label><input id="em"></div><div style="flex:2 1 220px"><label>Nome completo</label><input id="en"></div></div>
+  <button class="btn" style="margin-top:.8rem" onclick="addEleit()">Cadastrar eleitor</button><div class="msg" id="er" role="alert"></div>
+  <label>Cadastro em lote (uma linha por aluno: matrícula;nome) — usa a turma escolhida acima</label><textarea id="lote" rows="3" placeholder="20261234;Maria da Silva"></textarea>
+  <button class="btn s" style="margin-top:.5rem" onclick="lote()">Importar lista</button>
+  <div class="row" style="margin-top:1rem"><div><label>Filtrar tabela</label><select onchange="eT=this.value;admin()"><option value="">Todas as turmas</option>${opts(eT)}</select></div></div>
+  <div class="wrap"><table class="tbl"><tr><th>Matrícula</th><th>Nome</th><th>Turma</th><th>Votou</th><th></th></tr>${l.map(([m,e])=>`<tr><td>${esc(m)}</td><td>${esc(e.nome)}</td><td>${NT[e.turma]}</td><td>${e.votou?'✓':'—'}</td><td>${e.votou?'':`<button class="btn d" onclick="delEleit('${m}')">Remover</button>`}</td></tr>`).join('')||'<tr><td colspan="5">Nenhum eleitor cadastrado.</td></tr>'}</table></div></div>`;
+}
+function addEleit(){
+  const m=mat($('#em').value),n=$('#en').value.trim(),er=$('#er');fT=$('#et').value;
+  if(!m||!n)return er.textContent='Informe matrícula e nome.';
+  if(D.eleitores[m])return er.textContent='Esta matrícula já está cadastrada.';
+  D.eleitores[m]={nome:n,turma:fT};save();admin();
+}
+function lote(){
+  fT=$('#et').value;let ok=0;
+  $('#lote').value.split('\n').forEach(l=>{const [a,...b]=l.split(/[;\t]/);const m=mat(a||''),n=b.join(' ').trim();if(m&&n&&!D.eleitores[m]){D.eleitores[m]={nome:n,turma:fT};ok++;}});
+  save();admin();alert(ok+' eleitor(es) importado(s).');
+}
+function delEleit(m){if(confirm('Remover este eleitor?')){delete D.eleitores[m];save();admin();}}
+function pRes(){
+  return `<div class="card"><div class="row"><button class="btn" onclick="imprimir()">Imprimir / salvar PDF</button><button class="btn s" onclick="csv()">Exportar CSV</button><button class="btn d" onclick="zerar()">Zerar votos</button></div></div>${resHTML()}`;
+}
+function imprimir(){
+  const d=new Date().toLocaleString('pt-BR');
+  $('#rel').innerHTML=`<div style="text-align:center;margin-bottom:1rem"><img src="logo.png" alt="" style="height:70px"><h2>Escola Estadual Vicente de Paula Fraga</h2><h3>Relatório da eleição de representantes de turma — 2026</h3><p>Emitido em ${d} · Situação: ${D.meta.status}</p></div>${resHTML()}<p><small>Relatório sem identificação de eleitores: o voto é secreto e apenas totais são exibidos.</small></p><div class="sig"><div>Coordenação</div><div>Direção</div></div>`;
+  setTimeout(()=>print(),150);
+}
+function csv(){
+  const L=[['Turma','Candidato','Codigo','Votos']];
+  TURMAS.forEach(([t,n])=>{const r=calc(t);r.cs.forEach(c=>L.push([n,c.nome,c.c,c.n]));L.push([n,'Brancos','',r.br],[n,'Nulos','',r.nu]);});
+  const b=new Blob(['\ufeff'+L.map(r=>r.map(x=>`"${String(x).replaceAll('"','""')}"`).join(';')).join('\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='resultados-eleicao.csv';a.click();
+}
+function zerar(){
+  if(!confirm('Apagar TODOS os votos e liberar os eleitores para votar de novo?'))return;
+  D.votos={};Object.values(D.eleitores).forEach(e=>delete e.votou);save();admin();
+}
+render();
+</script>
 </body>
 </html>
