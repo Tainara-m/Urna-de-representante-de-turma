@@ -205,7 +205,14 @@ function pPainel(){
   const s=D.meta.status;
   const nE=Object.keys(D.eleitores).length,nV=Object.values(D.eleitores).filter(e=>e.votou).length;
   return `<div class="card"><h2>Situação da votação</h2><p style="margin:.4rem 0">${nE} eleitores cadastrados · ${nV} já votaram.</p>
-  <div class="row">${[['preparacao','Em preparação'],['aberta','Abrir votação'],['encerrada','Encerrar votação']].map(([i,n])=>`<button class="btn ${s===i?'':'s'}" onclick="setStatus('${i}')">${n}</button>`).join('')}</div></div>`;
+  <div class="row">${[['preparacao','Em preparação'],['aberta','Abrir votação'],['encerrada','Encerrar votação']].map(([i,n])=>`<button class="btn ${s===i?'':'s'}" onclick="setStatus('${i}')">${n}</button>`).join('')}</div></div>
+  <div class="card" style="border-color:var(--v)"><h2>Apagar todos os dados</h2><p style="margin:.4rem 0 .8rem">Remove eleitores, candidatos, votos e a senha da coordenação deste navegador. Exporte o CSV ou o PDF antes, se precisar do resultado.</p><button class="btn d" onclick="apagarTudo()">Apagar todos os dados</button></div>`;
+}
+function apagarTudo(){
+  if(prompt('Isso apaga TUDO e não pode ser desfeito.\nDigite APAGAR para confirmar:')!=='APAGAR')return;
+  localStorage.removeItem(K);sessionStorage.removeItem('adm');
+  D={meta:{status:'preparacao'},cands:{},eleitores:{},votos:{}};
+  location.hash==='#/'?render():location.hash='#/';
 }
 function setStatus(s){D.meta.status=s;save();admin();}
 function pCand(){
